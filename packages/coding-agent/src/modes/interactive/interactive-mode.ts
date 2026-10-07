@@ -3204,12 +3204,9 @@ export class InteractiveMode {
 				this.handleThinkingCommand(searchTerm);
 				return;
 			}
-			if (text === "/thinking-blocks" || text.startsWith("/thinking-blocks ")) {
-				const argument = text.startsWith("/thinking-blocks ")
-					? text.slice("/thinking-blocks ".length).trim()
-					: undefined;
+			if (text === "/toggle-focus") {
 				this.editor.setText("");
-				this.handleThinkingBlocksCommand(argument);
+				this.toggleThinkingBlockVisibility();
 				return;
 			}
 			if (text === "/export" || text.startsWith("/export ")) {
@@ -4573,35 +4570,11 @@ export class InteractiveMode {
 		this.ui.requestRender();
 	}
 
-	private setThinkingBlockVisibility(hidden: boolean): void {
-		this.hideThinkingBlock = hidden;
-		this.settingsManager.setHideThinkingBlock(hidden);
-		this.updateThinkingBlockVisibility();
-		this.showStatus(`Thinking blocks: ${hidden ? "hidden" : "visible"}`);
-	}
-
 	private toggleThinkingBlockVisibility(): void {
 		this.hideThinkingBlock = !this.hideThinkingBlock;
 		this.settingsManager.setHideThinkingBlock(this.hideThinkingBlock);
 		this.updateThinkingBlockVisibility();
 		this.showStatus(`Thinking blocks: ${this.hideThinkingBlock ? "hidden" : "visible"}`);
-	}
-
-	private handleThinkingBlocksCommand(argument?: string): void {
-		const normalized = argument?.trim().toLowerCase();
-		if (!normalized || normalized === "toggle") {
-			this.toggleThinkingBlockVisibility();
-			return;
-		}
-		if (normalized === "show" || normalized === "on") {
-			this.setThinkingBlockVisibility(false);
-			return;
-		}
-		if (normalized === "hide" || normalized === "off") {
-			this.setThinkingBlockVisibility(true);
-			return;
-		}
-		this.showError(`Unknown argument "${argument}". Use show, hide, or toggle.`);
 	}
 
 	private async handleOpenExternalEditor(): Promise<void> {

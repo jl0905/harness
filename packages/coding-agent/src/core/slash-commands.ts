@@ -21,11 +21,7 @@ export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [
 	{ name: "model", description: "Select model (opens selector UI)", argumentHint: "<provider/model>" },
 	{ name: "tree", description: "Navigate session tree (switch branches)" },
 	{ name: "thinking", description: "Set thinking level", argumentHint: "<level>" },
-	{
-		name: "thinking-blocks",
-		description: "Show or hide thinking blocks in the transcript",
-		argumentHint: "[show|hide|toggle]",
-	},
+	{ name: "toggle-focus", description: "Toggle thinking block visibility in the transcript" },
 	{ name: "scoped-models", description: "Enable/disable models for Ctrl+P cycling" },
 	{ name: "export", description: "Export session (HTML default, or specify path: .html/.jsonl)" },
 	{ name: "import", description: "Import and resume a session from a JSONL file" },
