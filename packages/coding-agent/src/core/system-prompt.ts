@@ -119,6 +119,8 @@ function buildRules(
 		for (const rule of toolGuidelines[name] ?? []) addRule(rule);
 	}
 	for (const rule of promptGuidelines) addRule(rule);
+	addRule("Do not consider development time or cost as a factor when making decisions");
+	addRule("Use concise, clear, simple language. Define unavoidable jargon before using it");
 	addRule("Be concise in your responses");
 	addRule("Show file paths clearly when working with files");
 	return rules.map((rule) => `- ${rule}`).join("\n");
