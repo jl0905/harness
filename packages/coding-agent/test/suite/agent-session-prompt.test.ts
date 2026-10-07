@@ -9,7 +9,7 @@ import type { ExtensionAPI, InputEvent } from "../../src/core/extensions/index.t
 import type { PromptTemplate } from "../../src/core/prompt-templates.ts";
 import { createSyntheticSourceInfo } from "../../src/core/source-info.ts";
 import { createTestResourceLoader } from "../utilities.ts";
-import { createHarness, getMessageText, type Harness } from "./harness.ts";
+import { createHarness, getMessageText, getUserTexts, type Harness } from "./harness.ts";
 
 const processImage = vi.hoisted(() =>
 	vi.fn(async (_bytes: Uint8Array, mimeType: string) => ({
@@ -494,7 +494,7 @@ describe("AgentSession prompt characterization", () => {
 		await promptPromise;
 	});
 
-	it("throws when prompted during manual compaction", async () => {
+	it("accepts a prompt during manual compaction", async () => {
 		let markCompactionStarted = () => {};
 		const compactionStarted = new Promise<void>((resolve) => {
 			markCompactionStarted = resolve;
@@ -523,7 +523,7 @@ describe("AgentSession prompt characterization", () => {
 			],
 		});
 		harnesses.push(harness);
-		harness.setResponses([fauxAssistantMessage("one"), fauxAssistantMessage("two")]);
+		harness.setResponses([fauxAssistantMessage("one"), fauxAssistantMessage("two"), fauxAssistantMessage("three")]);
 		await harness.session.prompt("first");
 		await harness.session.prompt("second");
 
@@ -531,9 +531,8 @@ describe("AgentSession prompt characterization", () => {
 		await compactionStarted;
 
 		try {
-			await expect(harness.session.prompt("third")).rejects.toThrow(
-				"Cannot submit a prompt while compaction is in progress. Wait for compaction to finish and retry.",
-			);
+			await expect(harness.session.prompt("third")).resolves.toBeUndefined();
+			expect(getUserTexts(harness)).toContain("third");
 		} finally {
 			releaseCompaction();
 			await compactPromise;

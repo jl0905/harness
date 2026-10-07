@@ -12,7 +12,7 @@ describe("issue #7150: RPC prompt during manual compaction", () => {
 		}
 	});
 
-	it("rejects an RPC prompt while manual compaction is in progress", async () => {
+	it("accepts an RPC prompt while manual compaction is in progress", async () => {
 		let markCompactionStarted = () => {};
 		const compactionStarted = new Promise<void>((resolve) => {
 			markCompactionStarted = resolve;
@@ -80,13 +80,11 @@ describe("issue #7150: RPC prompt during manual compaction", () => {
 				entry.type === "message" && entry.message.role === "user" ? [getMessageText(entry.message)] : [],
 			);
 
-		expect(preflightResult).toBeUndefined();
-		expect(promptError).toEqual(
-			expect.objectContaining({ message: expect.stringContaining("compaction is in progress") }),
-		);
-		expect(getUserTexts(harness)).not.toContain("PROBE-7150");
-		expect(persistedUserTexts).not.toContain("PROBE-7150");
-		expect(harness.eventsOfType("agent_start")).toHaveLength(0);
-		expect(harness.eventsOfType("agent_settled")).toHaveLength(0);
+		expect(promptError).toBeUndefined();
+		expect(preflightResult).toBe("started");
+		expect(getUserTexts(harness)).toContain("PROBE-7150");
+		expect(persistedUserTexts).toContain("PROBE-7150");
+		expect(harness.eventsOfType("agent_start").length).toBeGreaterThan(0);
+		expect(harness.eventsOfType("agent_settled").length).toBeGreaterThan(0);
 	});
 });
