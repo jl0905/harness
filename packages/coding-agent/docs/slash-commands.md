@@ -11,7 +11,7 @@ Extensions, prompt templates, and skills can add commands. The command menu in P
 | `/settings` | Open settings |
 | `/model [provider/model]` | Select a model |
 | `/thinking [level]` | Set the thinking level |
-| `/toggle-focus` | Toggle thinking block visibility in the transcript |
+| `/toggle-focus` | Toggle focus mode (hide thinking blocks and collapse tool output) |
 | `/scoped-models` | Configure the models used by interactive cycling |
 | `/login [provider]` | Add provider authentication |
 | `/logout` | Remove provider authentication |

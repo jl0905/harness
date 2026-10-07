@@ -512,6 +512,9 @@ export class InteractiveMode {
 
 	// Thinking block visibility state
 	private hideThinkingBlock = false;
+
+	// Focus mode: hides thinking blocks and collapses tool output together
+	private focusMode = false;
 	private outputPad = 1;
 	private readonly mermaidMarkdownTransformer: MarkdownTransformer = createMermaidMarkdownTransformer({
 		getMode: () => this.settingsManager.getMermaidRenderingMode(),
@@ -3206,7 +3209,7 @@ export class InteractiveMode {
 			}
 			if (text === "/toggle-focus") {
 				this.editor.setText("");
-				this.toggleThinkingBlockVisibility();
+				this.toggleFocusMode();
 				return;
 			}
 			if (text === "/export" || text.startsWith("/export ")) {
@@ -4546,11 +4549,25 @@ export class InteractiveMode {
 		this.ui.requestRender();
 	}
 
+	private setThinkingBlockVisibility(hidden: boolean): void {
+		this.hideThinkingBlock = hidden;
+		this.settingsManager.setHideThinkingBlock(hidden);
+		this.updateThinkingBlockVisibility();
+	}
+
 	private toggleThinkingBlockVisibility(): void {
 		this.hideThinkingBlock = !this.hideThinkingBlock;
 		this.settingsManager.setHideThinkingBlock(this.hideThinkingBlock);
 		this.updateThinkingBlockVisibility();
 		this.showStatus(`Thinking blocks: ${this.hideThinkingBlock ? "hidden" : "visible"}`);
+	}
+
+	/** Focus mode hides thinking blocks and collapses tool output together. */
+	private toggleFocusMode(): void {
+		this.focusMode = !this.focusMode;
+		this.setThinkingBlockVisibility(this.focusMode);
+		this.setToolsExpanded(!this.focusMode);
+		this.showStatus(`Focus mode: ${this.focusMode ? "on" : "off"}`);
 	}
 
 	private async handleOpenExternalEditor(): Promise<void> {
