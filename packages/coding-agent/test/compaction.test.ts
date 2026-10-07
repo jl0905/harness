@@ -14,6 +14,7 @@ import {
 	getLastAssistantUsage,
 	prepareCompaction,
 	shouldCompact,
+	shouldCompactForResponseBudget,
 } from "../src/core/compaction/index.ts";
 import {
 	buildSessionContext,
@@ -291,6 +292,18 @@ describe("shouldCompact", () => {
 		};
 
 		expect(shouldCompact(95000, 100000, settings)).toBe(false);
+	});
+});
+
+describe("shouldCompactForResponseBudget", () => {
+	it("triggers when the remaining window is smaller than the model output cap", () => {
+		expect(shouldCompactForResponseBudget(95000, 100000, 8192)).toBe(true);
+		expect(shouldCompactForResponseBudget(90000, 100000, 8192)).toBe(false);
+	});
+
+	it("does not trigger without a usable window or output cap", () => {
+		expect(shouldCompactForResponseBudget(95000, 0, 8192)).toBe(false);
+		expect(shouldCompactForResponseBudget(95000, 100000, 0)).toBe(false);
 	});
 });
 

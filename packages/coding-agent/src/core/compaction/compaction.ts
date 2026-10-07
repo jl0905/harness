@@ -269,6 +269,21 @@ export function shouldCompact(contextTokens: number, contextWindow: number, sett
 	return contextTokens > contextWindow - settings.reserveTokens;
 }
 
+/**
+ * Check whether the context leaves too little room for the model's next response.
+ * Derived from the model's own limits, so it needs no configured threshold and no
+ * usage statistics: compact once the remaining window is smaller than the model's
+ * maximum output.
+ */
+export function shouldCompactForResponseBudget(
+	contextTokens: number,
+	contextWindow: number,
+	maxOutputTokens: number,
+): boolean {
+	if (contextWindow <= 0 || maxOutputTokens <= 0) return false;
+	return contextWindow - contextTokens < maxOutputTokens;
+}
+
 // ============================================================================
 // Cut point detection
 // ============================================================================

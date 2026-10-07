@@ -76,6 +76,7 @@ import {
 	generateBranchSummary,
 	prepareCompaction,
 	shouldCompact,
+	shouldCompactForResponseBudget,
 } from "./compaction/index.ts";
 import { DEFAULT_THINKING_LEVEL, THINKING_LEVEL_OPTIONS } from "./defaults.ts";
 import { exportSessionToHtml, type ToolHtmlRenderer } from "./export-html/index.ts";
@@ -781,10 +782,10 @@ export class AgentSession {
 	/** Whether `projection`, the current session projection, exceeds the compaction threshold of `model`. */
 	private _exceedsCompactionThreshold(model: Model<any>, projection: SessionProjection): boolean {
 		if (model.contextWindow <= 0) return false;
-		return shouldCompact(
-			estimateProjectedContextTokens(projection, this.sessionManager.getBranch()).tokens,
-			model.contextWindow,
-			this.settingsManager.getCompactionSettings(this.model),
+		const contextTokens = estimateProjectedContextTokens(projection, this.sessionManager.getBranch()).tokens;
+		return (
+			shouldCompact(contextTokens, model.contextWindow, this.settingsManager.getCompactionSettings(this.model)) ||
+			shouldCompactForResponseBudget(contextTokens, model.contextWindow, model.maxTokens)
 		);
 	}
 
@@ -3056,6 +3057,7 @@ export class AgentSession {
 		const messageModel = this._modelForMessage(assistantMessage);
 		const sameModel = messageModel !== undefined;
 		const contextWindow = (messageModel ?? this.model)?.contextWindow ?? 0;
+		const maxOutputTokens = (messageModel ?? this.model)?.maxTokens ?? 0;
 
 		// Skip compaction checks if this assistant message is older than the latest
 		// compaction boundary. This prevents a stale pre-compaction usage/error
@@ -3171,7 +3173,10 @@ export class AgentSession {
 		} else {
 			contextTokens = directContextTokens;
 		}
-		if (shouldCompact(contextTokens, contextWindow, settings)) {
+		if (
+			shouldCompact(contextTokens, contextWindow, settings) ||
+			shouldCompactForResponseBudget(contextTokens, contextWindow, maxOutputTokens)
+		) {
 			return await this._runAutoCompaction("threshold", false);
 		}
 		return false;
